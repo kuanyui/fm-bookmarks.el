@@ -68,13 +68,41 @@
     (define-key map (kbd "<up>") 'fm-bookmark-previous-line)
     (define-key map (kbd "<down>") 'fm-bookmark-next-line)
     map)
-  "Keymap for Moedict major mode.")   ;document
+  "")   ;document
 
 (define-derived-mode fm-bookmark-mode nil "FM Bookmarks"
-  "Major mode for looking up Chinese vocabulary via Moedict API."
+  ""
   (set (make-local-variable 'buffer-read-only) t)
   (hl-line-mode t)
   )
+
+;; ======================================================
+;; Faces
+;; ======================================================
+(defgroup fm-bookmark-faces nil
+  ""
+  :group 'fm-bookmark
+  :group 'faces)
+
+(defface fm-bookmark-title
+  '((((class color) (background light)) (:foreground "#a0a0a0"))
+    (((class color) (background dark)) (:foreground "#525252")))
+  "" :group 'fm-bookmark-faces)
+
+(defface fm-bookmark-file-manager
+  '((((class color) (background light)) (:bold t :foreground "#6faaff"))
+    (((class color) (background dark)) (:bold t :foreground "#6faaff")))
+  "" :group 'fm-bookmark-faces)
+
+(defface fm-bookmark-custom
+  '((((class color) (background light)) (:bold t :foreground "#5fd700"))
+    (((class color) (background dark)) (:bold t :foreground "#a1db00")))
+  "" :group 'fm-bookmark-faces)
+
+(defface fm-bookmark-media
+  '((((class color) (background light)) (:bold t :foreground "#ff4ea3"))
+    (((class color) (background dark)) (:bold t :foreground "#ff6fa5")))
+  "" :group 'fm-bookmark-faces)
 
 ;; ======================================================
 ;; Variables
@@ -217,11 +245,11 @@ gnome3
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
      (concat (propertize (fm-bookmark-symbol-to-title fm-symbol)
-			 'face 'font-lock-comment-face)
+			 'face 'fm-bookmark-title)
 	     (mapconcat
 	      (lambda (item)
 		(propertize (concat "  " (car item) "\n")
-			    'face 'dired-directory
+			    'face 'fm-bookmark-file-manager
 			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
 	      (cond ((eq fm-symbol 'kde4)
 		     (fm-bookmark-kde4-parser))
@@ -283,7 +311,7 @@ gnome3
 (defun fm-bookmark-next-line ()
   (interactive)
   (next-line)
-  (if (eq (face-at-point) 'font-lock-comment-face)
+  (if (eq (face-at-point) 'fm-bookmark-title)
       (next-line))
   (when (eobp) (goto-line 2))
   )
@@ -294,7 +322,7 @@ gnome3
   (when (eq (line-number-at-pos) 1)
     (goto-char (point-max))
     (previous-line))
-  (if (eq (face-at-point) 'font-lock-comment-face)
+  (if (eq (face-at-point) 'fm-bookmark-title)
       (previous-line)))
 
 ;; ======================================================
