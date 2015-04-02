@@ -25,7 +25,8 @@
 
 ;;; Commentary:
 
-;; Open existed file managers' (e.g. Dolphin, Nautilus, PCManFM) bookmarks with Dired.
+;; Use existed bookmarks of file managers (e.g. Dolphin, Nautilus,
+;; PCManFM) in Dired.
 
 ;;; Code:
 
