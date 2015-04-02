@@ -90,18 +90,23 @@ pcmanfm : PCManFM")
 ;; ======================================================
 ;; External Media (Experimental, Linux Only)
 ;; ======================================================
+(benchmark-run 100
+  (let ((mount (shell-command-to-string "mount | grep 'media'")))
+    (string-match "^\\([A-z0-9/]+\\) on \\(.+\\) type [A-z]+ [^ ]+$" mount)
+    (match-string 1 mount))
+  ) ;8.x秒
 
 (benchmark-run 100
+  (replace-regexp-in-string "^\\([A-z0-9/]+\\) on \\(.+\\) type [A-z]+ [^ ]+$" "\\1 \\2" (shell-command-to-string "mount | grep 'media'")
+			    ))
 
-  (with-temp-buffer
-    (insert-file-contents "/etc/mtab")
-    (mapcar
-     (lambda (line)
-       (let (( splitted-line (split-string line " ") ))
-	 (cons (nth 0 splitted-line) (nth 1 splitted-line))))
-     (split-string (buffer-string) "\n")))
 
-  )
+
+"/dev/sdc1 on /run/media/kuanyui/kuanyui 1G type fuseblk (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other,blksize=4096)
+/dev/sdc1 on /var/run/media/kuanyui/kuanyui 1G type fuseblk (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other,blksize=4096)
+"
+
+
 
 ;; ======================================================
 ;; Main
