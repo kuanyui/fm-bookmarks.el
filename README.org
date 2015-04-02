@@ -34,15 +34,16 @@ Currently under heavy development, don't use.
 
   ;; Available options: kde4, gnome3, pcmanfm, custom
   ;; Multiple file managers are acceptable.
-  (setq fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm custom))
+  ;; Notice that 'media currently is only available on Unix-like OS
+  (setq fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
 
   ;; Add customized bookmarks
-  (setq fm-bookmark-customized-bookmarks
+  (setq fm-bookmark-custom-bookmarks
         '(("Root" . "/")
           ("Tmp" . "/tmp/")
           ))
 
-  ;; Show external mounted media (Experimental, Linux only).
+
   (setq fm-bookmark-enable-mounted-media t)
 
   (global-set-key (kbd "C-x `") #'fm-bookmark)

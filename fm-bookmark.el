@@ -87,18 +87,17 @@
   "Width of buffer"
   )
 
-(defvar fm-bookmark-enabled-file-managers '(kde4 custom)
+(defvar fm-bookmark-enabled-file-managers '(kde4 custom media)
   "Enabled file managers/items. Ordering is sensitive.
 Add custom bookmarks manually via `fm-bookmark-custom-bookmarks'.
-Available options: `(kde4 gnome3 pcmanfm custom)
+Available options: '(kde4 gnome3 pcmanfm custom media)
+
+Notice that 'media is only available on Unix-like OS (exclude Mac
+OS X)
 ")
 
 
-(defvar fm-bookmark-enable-mounted-media t
-  "[Experimental feature]
-If nil, don't use to save time.
-If t and system-type is Unix-like, show mounted media.
-")
+
 
 (defconst fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
@@ -150,19 +149,14 @@ Output is like:
 	  "\n"))
  :test (lambda (a b) (equal (car a) (car b)))))
 
-(defun fm-bookmark-generate-media-list ()
+(defun fm-bookmark-generate-media-pair-list ()
   (if (member system-type '(gnu gnu/linux gnu/kfreebsd cygwin))
-      (concat
-       (propertize (fm-bookmark-symbol-to-display-name 'media)
-		   'face 'font-lock-comment-face)
-       (mapconcat
-	(lambda (item)
-	  (propertize (concat "  " (file-name-base (cdr item)) "\n")
-		      'face 'dired-symlink
-		      'href (cdr item)))
-	(fm-bookmark-get-and-parse-media-list)
-	""
-	))))
+      (mapcar (lambda (x)
+		(cons (file-name-base (cdr x)) (cdr x))
+		)
+	      (fm-bookmark-get-and-parse-media-list)
+	      )
+    ))
 
 ;; ======================================================
 ;; Main
@@ -192,8 +186,6 @@ Output is like:
   (let (buffer-read-only)
     (erase-buffer)
     (insert (fm-bookmark-generate-list))
-    (if fm-bookmark-enable-mounted-media
-	(insert (fm-bookmark-generate-media-list)))
     )
   (fm-bookmark-mode)
   (goto-line fm-bookmark--last-line-position)
@@ -203,7 +195,7 @@ Output is like:
     (linum-mode -1))
   )
 
-(defun fm-bookmark-symbol-to-display-name (symbol)
+(defun fm-bookmark-symbol-to-title (symbol)
   (let ((display-name
 	 (or (cdr (assq symbol fm-bookmark-file-managers-display-name))
 	     (symbol-name symbol))))
@@ -224,7 +216,7 @@ gnome3
  "
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
-     (concat (propertize (fm-bookmark-symbol-to-display-name fm-symbol)
+     (concat (propertize (fm-bookmark-symbol-to-title fm-symbol)
 			 'face 'font-lock-comment-face)
 	     (mapconcat
 	      (lambda (item)
@@ -239,6 +231,9 @@ gnome3
 		     (fm-bookmark-gtk-parser fm-symbol))
 		    ((eq fm-symbol 'custom)
 		     fm-bookmark-custom-bookmarks)
+		    ((eq fm-symbol 'media)
+		     (fm-bookmark-generate-media-pair-list)
+		     )
 		    )
 	      "")))
    fm-bookmark-enabled-file-managers
