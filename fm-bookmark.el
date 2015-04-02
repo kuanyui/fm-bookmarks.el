@@ -59,10 +59,14 @@
     (define-key map (kbd "q") '(lambda ()
 				 (interactive)
 				 (fm-bookmark-update-last-line-position)
-				 (delete-window (selected-window))
+				 (kill-buffer-and-window)
 				 ))
     (define-key map (kbd "h") 'describe-mode)
     (define-key map (kbd "RET") 'fm-bookmark-open-this)
+    (define-key map (kbd "TAB") 'fm-bookmark-next-category)
+    (define-key map (kbd "<backtab>") 'fm-bookmark-previous-category)
+    (define-key map (kbd "<up>") 'fm-bookmark-previous-line)
+    (define-key map (kbd "<down>") 'fm-bookmark-next-line)
     map)
   "Keymap for Moedict major mode.")   ;document
 
@@ -130,17 +134,15 @@ Output is like:
 (defun fm-bookmark-generate-media-list ()
   (if (member system-type '(gnu gnu/linux gnu/kfreebsd cygwin))
       (concat
-       "\n"
-       (propertize (make-string (1- fm-bookmark-buffer-width) ?=)
+       (propertize (concat (make-string (1- fm-bookmark-buffer-width) ?=) "\n")
 		   'face 'font-lock-comment-face)
-       "\n"
        (mapconcat
 	(lambda (item)
-	  (propertize (file-name-base (cdr item))
+	  (propertize (concat (file-name-base (cdr item)) "\n")
 		      'face 'dired-symlink
 		      'href (cdr item)))
 	(fm-bookmark-get-and-parse-media-list)
-	"\n"
+	""
 	))))
 
 ;; ======================================================
@@ -190,12 +192,11 @@ gnome3
  "
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
-     (concat (propertize (symbol-name fm-symbol)
+     (concat (propertize (concat (symbol-name fm-symbol) "\n")
 			 'face 'font-lock-comment-face)
-	     "\n"
 	     (mapconcat
 	      (lambda (item)
-		(propertize (concat "  " (car item))
+		(propertize (concat "  " (car item) "\n")
 			    'face 'dired-directory
 			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
 	      (cond ((eq fm-symbol 'kde4)
@@ -204,9 +205,9 @@ gnome3
 		     (fm-bookmark-gtk-parser fm-symbol))
 		    ((eq fm-symbol 'pcmanfm)
 		     (fm-bookmark-gtk-parser fm-symbol)))
-	      "\n")))
+	      "")))
    fm-bookmark-enabled-file-managers
-   "\n"))
+   ""))
 
 (defun fm-bookmark-open-this ()
   (interactive)
@@ -221,8 +222,50 @@ gnome3
       (message "There's no link"))
     ))
 
+;; ======================================================
+;; Tools for UX
+;; ======================================================
+
 (defun fm-bookmark-update-last-line-position ()
   (setf fm-bookmark--last-line-position (line-number-at-pos)))
+
+(defun fm-bookmark-next-category ()
+  "Move cursor to next category"
+  (interactive)
+  (next-line)
+  (when (get-text-property (point) 'face)
+    (goto-char (next-single-property-change (point) 'face nil (point-max))))
+  (if (eobp) (goto-char (point-min)))
+  (next-line)
+  )
+
+(defun fm-bookmark-previous-category ()
+  "Move cursor to previous category"
+  (interactive)
+  (previous-line)
+  (when (get-text-property (point) 'face)
+    (goto-char (previous-single-property-change (point) 'face nil (point-min))))
+  (when (bobp)
+    (goto-char (point-max))
+    (fm-bookmark-previous-category))
+  )
+
+(defun fm-bookmark-next-line ()
+  (interactive)
+  (next-line)
+  (if (eq (face-at-point) 'font-lock-comment-face)
+      (next-line))
+  (when (eobp) (goto-line 2))
+  )
+
+(defun fm-bookmark-previous-line ()
+  (interactive)
+  (previous-line)
+  (when (eq (line-number-at-pos) 1)
+    (goto-char (point-max))
+    (previous-line))
+  (if (eq (face-at-point) 'font-lock-comment-face)
+      (previous-line)))
 
 ;; ======================================================
 ;; Parser
