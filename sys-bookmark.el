@@ -30,6 +30,7 @@
 ;;; Code:
 
 (require 'xml)
+(require 'cl)
 
 ;; ======================================================
 ;; Major Mode
@@ -75,8 +76,18 @@
 (defvar fm-bookmark-buffer-name "*SysBookmarks*"
   "Name of the buffer.")
 
+(defvar fm-bookmark-buffer-width 25
+  "Width of buffer"
+  )
+
 (defvar fm-bookmark-enabled-file-manager '(kde4 gnome3 pcmanfm)
   "Enabled file managers")
+
+(defvar fm-bookmark-enable-mounted-media t
+  "[Experimental feature]
+If nil, don't use to save time.
+If t and system-type is Unix-like, show mounted media.
+")
 
 (defvar fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
@@ -90,23 +101,41 @@ pcmanfm : PCManFM")
 ;; ======================================================
 ;; External Media (Experimental, Linux Only)
 ;; ======================================================
-(benchmark-run 100
-  (let ((mount (shell-command-to-string "mount | grep 'media'")))
-    (string-match "^\\([A-z0-9/]+\\) on \\(.+\\) type [A-z]+ [^ ]+$" mount)
-    (match-string 1 mount))
-  ) ;8.x秒
 
-(benchmark-run 100
-  (replace-regexp-in-string "^\\([A-z0-9/]+\\) on \\(.+\\) type [A-z]+ [^ ]+$" "\\1 \\2" (shell-command-to-string "mount | grep 'media'")
-			    ))
+(defun fm-bookmark-get-and-parse-media-list ()
+  "Get raw list from `mount` command and parse.
+Output is like:
+((\"/dev/sdb1\" . \"/var/run/media/kuanyui/kuanyui\")
+ (\"/dev/sdb2\" . \"/var/run/media/kuanyui/windows\")
+ (\"/dev/sdc1\" . \"/var/run/media/kuanyui/kuanyui 1G\"))"
+(remove-duplicates
+ (mapcar (lambda (line)
+	   (save-match-data
+	     (string-match "^\\([^ ]+\\) on \\(.+\\) type [^ ]+ [^ ]+$" line)
+	     (cons (match-string 1 line)
+		   (match-string 2 line)
+		   )
+	     ))
+	 (split-string
+	  (substring (shell-command-to-string "mount | grep 'media'") 0 -1) ;fuck you elisp
+	  "\n"))
+ :test (lambda (a b) (equal (car a) (car b)))))
 
-
-
-"/dev/sdc1 on /run/media/kuanyui/kuanyui 1G type fuseblk (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other,blksize=4096)
-/dev/sdc1 on /var/run/media/kuanyui/kuanyui 1G type fuseblk (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other,blksize=4096)
-"
-
-
+(defun fm-bookmark-generate-media-list ()
+  (if (member system-type '(gnu gnu/linux gnu/kfreebsd cygwin))
+      (concat
+       "\n"
+       (propertize (make-string (1- fm-bookmark-buffer-width) ?=)
+		   'face 'font-lock-comment-face)
+       "\n"
+       (mapconcat
+	(lambda (item)
+	  (propertize (file-name-base (cdr item))
+		      'face 'dired-symlink
+		      'href (cdr item)))
+	(fm-bookmark-get-and-parse-media-list)
+	"\n"
+	))))
 
 ;; ======================================================
 ;; Main
@@ -117,9 +146,9 @@ pcmanfm : PCManFM")
   (let ((w (max n window-min-width)))
     (unless (null window)
       (if (> (window-width) w)
-          (shrink-window-horizontally (- (window-width) w))
-        (if (< (window-width) w)
-            (enlarge-window-horizontally (- w (window-width))))))))
+	  (shrink-window-horizontally (- (window-width) w))
+	(if (< (window-width) w)
+	    (enlarge-window-horizontally (- w (window-width))))))))
 (defalias 'fm-bookmark #'fm-bookmark-open-buffer)
 
 (defun fm-bookmark-open-buffer ()
@@ -127,16 +156,18 @@ pcmanfm : PCManFM")
   (split-window-horizontally)
   (switch-to-buffer fm-bookmark-buffer-name)
   (kill-all-local-variables)
-  (fm-bookmark--set-width (selected-window) 25)
+  (fm-bookmark--set-width (selected-window) fm-bookmark-buffer-width)
+  (set-window-dedicated-p (selected-window) t)
   (let (buffer-read-only)
     (erase-buffer)
-    (set-window-dedicated-p (selected-window) t)
     (insert (fm-bookmark-generate-list))
+    (if fm-bookmark-enable-mounted-media
+	(insert (fm-bookmark-generate-media-list)))
     )
   (fm-bookmark-mode)
   ;; Disable linum
   (when (and (boundp 'linum-mode)
-             (not (null linum-mode)))
+	     (not (null linum-mode)))
     (linum-mode -1))
   )
 
