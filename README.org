@@ -44,6 +44,3 @@
    - [ ] Add/Edit/Delete bookmarks directly.
    - [ ] Update modeline with cursor moving.
    - [ ] Stay alive after opening link.
-
-** Known Issue
-   - Window may be resized after closing =fm-bookmark='s buffer.

@@ -155,6 +155,7 @@ Output is like:
 
 (defun fm-bookmark-open-buffer ()
   (interactive)
+  (select-window (window-at 0 0))
   (split-window-horizontally)
   (switch-to-buffer fm-bookmark-buffer-name)
   (kill-all-local-variables)
