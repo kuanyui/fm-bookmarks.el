@@ -4,7 +4,7 @@
 ** Introduce
    If you're using Dired, you may want to directly access existed bookmarks in your prefered file manager (e.g. Dolphin, Nautilus, PCManFM) via Dired, without any redundant configuration for Dired or `balahbalah-bookmarks.el`. If so, =fm-bookmark.el= is just what you're looking for.
 
-    =fm-bookmark.el= also has an (experimental) feature to list mounted
+    =fm-bookmark.el= also has an experimental feature to list mounted media (via =mount= shell command, due to the limitation of the crap Emacs Lisp).
 
 ** Requirement
    - Any of supported file managers. Currently available:
