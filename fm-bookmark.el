@@ -85,8 +85,8 @@
   :group 'faces)
 
 (defface fm-bookmark-title
-  '((((class color) (background light)) (:foreground "#a0a0a0"))
-    (((class color) (background dark)) (:foreground "#525252")))
+  '((((class color) (background light)) (:foreground "#808080"))
+    (((class color) (background dark)) (:foreground "#a0a0a0")))
   "" :group 'fm-bookmark-faces)
 
 (defface fm-bookmark-file-manager
@@ -103,6 +103,13 @@
   '((((class color) (background light)) (:bold t :foreground "#ff4ea3"))
     (((class color) (background dark)) (:bold t :foreground "#ff6fa5")))
   "" :group 'fm-bookmark-faces)
+
+(defun fm-bookmark-get-face (symbol)
+  (cdr (assoc* symbol '(((kde4 gnome3 pcmanfm)	. fm-bookmark-file-manager)
+			((media)		. fm-bookmark-media)
+			((custom)		. fm-bookmark-custom))
+	       :test (lambda (sym pair) (memq sym pair))
+	       )))
 
 ;; ======================================================
 ;; Variables
@@ -249,7 +256,7 @@ gnome3
 	     (mapconcat
 	      (lambda (item)
 		(propertize (concat "  " (car item) "\n")
-			    'face 'fm-bookmark-file-manager
+			    'face (fm-bookmark-get-face fm-symbol)
 			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
 	      (cond ((eq fm-symbol 'kde4)
 		     (fm-bookmark-kde4-parser))
@@ -326,8 +333,8 @@ gnome3
       (previous-line)))
 
 ;; ======================================================
-;; Parser
 ;; ======================================================
+;; Parser
 
 (defun fm-bookmark-kde4-parser ()
   (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmark-supported-file-managers))))
