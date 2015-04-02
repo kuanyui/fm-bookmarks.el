@@ -12,6 +12,10 @@
    media (via =mount= shell command, due to the limitation of the crap
    Emacs Lisp).
 
+** Screenshot
+
+[[https://farm8.staticflickr.com/7649/16821075989_b64f10b53c_o.png]]
+
 ** Requirement
    - Any of supported file managers. Currently available:
      + Dolphin (KDE4)
