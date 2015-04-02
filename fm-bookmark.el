@@ -87,8 +87,12 @@
   "Width of buffer"
   )
 
-(defvar fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm)
-  "Enabled file managers")
+(defvar fm-bookmark-enabled-file-managers '(kde4 custom)
+  "Enabled file managers/items. Ordering is sensitive.
+Add custom bookmarks manually via `fm-bookmark-custom-bookmarks'.
+Available options: `(kde4 gnome3 pcmanfm custom)
+")
+
 
 (defvar fm-bookmark-enable-mounted-media t
   "[Experimental feature]
@@ -105,10 +109,20 @@ If t and system-type is Unix-like, show mounted media.
   '((kde4	.	"Dolphin")
     (gnome3	.	"Nautilus")
     (pcmanfm	.	"PCManFM")
+    (custom     .       "Custom Bookmarks")
     (media	.	"External Media")
     )
   "Display names of each file manager"
   )
+
+(defvar fm-bookmark-custom-bookmarks nil
+  "Besides the bookmarks grabbed from file managers, you can also
+  add other new bookmarks manually. Example:
+  '((\"Root\" . \"/\")
+    (\"Dir Name\" . \"/path/to/dir\" ))
+
+Finally, please remember to add 'custom into
+`fm-bookmark-enabled-file-managers'" )
 
 (defvar fm-bookmark--last-line-position 0
   "Internal use. Don't change.")
@@ -222,7 +236,10 @@ gnome3
 		    ((eq fm-symbol 'gnome3)
 		     (fm-bookmark-gtk-parser fm-symbol))
 		    ((eq fm-symbol 'pcmanfm)
-		     (fm-bookmark-gtk-parser fm-symbol)))
+		     (fm-bookmark-gtk-parser fm-symbol))
+		    ((eq fm-symbol 'custom)
+		     fm-bookmark-custom-bookmarks)
+		    )
 	      "")))
    fm-bookmark-enabled-file-managers
    ""))
@@ -332,4 +349,5 @@ gnome3
 
 
 (provide 'fm-bookmark)
+
 ;;; fm-bookmark.el ends here
