@@ -96,14 +96,19 @@ If nil, don't use to save time.
 If t and system-type is Unix-like, show mounted media.
 ")
 
-(defvar fm-bookmark-supported-file-managers
+(defconst fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
     (gnome3	.	"~/.config/gtk-3.0/bookmarks")
-    (pcmanfm	.	"~/.gtk-bookmarks"))
-  "
-gnome3 : Nautilus
-kde4 : Dolphin
-pcmanfm : PCManFM")
+    (pcmanfm	.	"~/.gtk-bookmarks")))
+
+(defvar fm-bookmark-file-managers-display-name
+  '((kde4	.	"Dolphin")
+    (gnome3	.	"Nautilus")
+    (pcmanfm	.	"PCManFM")
+    (media	.	"External Media")
+    )
+  "Display names of each file manager"
+  )
 
 (defvar fm-bookmark--last-line-position 0
   "Internal use. Don't change.")
@@ -134,11 +139,11 @@ Output is like:
 (defun fm-bookmark-generate-media-list ()
   (if (member system-type '(gnu gnu/linux gnu/kfreebsd cygwin))
       (concat
-       (propertize (concat (make-string (1- fm-bookmark-buffer-width) ?=) "\n")
+       (propertize (fm-bookmark-symbol-to-display-name 'media)
 		   'face 'font-lock-comment-face)
        (mapconcat
 	(lambda (item)
-	  (propertize (concat (file-name-base (cdr item)) "\n")
+	  (propertize (concat "  " (file-name-base (cdr item)) "\n")
 		      'face 'dired-symlink
 		      'href (cdr item)))
 	(fm-bookmark-get-and-parse-media-list)
@@ -181,6 +186,16 @@ Output is like:
     (linum-mode -1))
   )
 
+(defun fm-bookmark-symbol-to-display-name (symbol)
+  (let ((display-name
+	 (or (cdr (assq symbol fm-bookmark-file-managers-display-name))
+	     (symbol-name symbol))))
+    (concat
+     display-name " "
+     (make-string (- fm-bookmark-buffer-width (+ 2 (length display-name))) ?=)
+     "\n"
+     )))
+
 (defun fm-bookmark-generate-list ()
   "Generate a formatted dir list with text propertized.
 kde4
@@ -192,7 +207,7 @@ gnome3
  "
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
-     (concat (propertize (concat (symbol-name fm-symbol) "\n")
+     (concat (propertize (fm-bookmark-symbol-to-display-name fm-symbol)
 			 'face 'font-lock-comment-face)
 	     (mapconcat
 	      (lambda (item)
