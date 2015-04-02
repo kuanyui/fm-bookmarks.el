@@ -40,12 +40,23 @@
 (define-key dired-mode-map (kbd "`") #'fm-bookmark)
 #+END_SRC
 
+** Usage
+| Key          | Description               |
+|--------------+---------------------------|
+| =Enter=      | Open this directory       |
+| =q=          | Close and quit            |
+|--------------+---------------------------|
+| =Tab=        | Jump to next category     |
+| =Shift-Tab=  | Jump to previous category |
+|--------------+---------------------------|
+| =Up= , =p=   | Previous item             |
+| =Down= , =n= | Previous item             |
 
-** Todo List
+** Todo
    - [ ] Pattern to emit items.
    - [ ] More supported FM.
      + [ ] Windows Explorer?
      + [ ] OSX Finder?
    - [ ] Add/Edit/Delete bookmarks directly.
    - [ ] Update modeline with cursor moving.
-   - [ ] Stay alive after opening link.
+   - [ ] Stay alive after opening link
