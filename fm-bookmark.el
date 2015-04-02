@@ -32,6 +32,7 @@
 
 (require 'xml)
 (require 'cl)
+(require 'dired)
 
 ;; ======================================================
 ;; Major Mode
@@ -64,7 +65,7 @@
     map)
   "Keymap for Moedict major mode.")   ;document
 
-(define-derived-mode fm-bookmark-mode nil "SysBookmarks"
+(define-derived-mode fm-bookmark-mode nil "FM Bookmarks"
   "Major mode for looking up Chinese vocabulary via Moedict API."
   (set (make-local-variable 'buffer-read-only) t)
   (hl-line-mode t)
@@ -74,14 +75,14 @@
 ;; Variables
 ;; ======================================================
 
-(defvar fm-bookmark-buffer-name "*SysBookmarks*"
+(defvar fm-bookmark-buffer-name "*FM Bookmarks*"
   "Name of the buffer.")
 
 (defvar fm-bookmark-buffer-width 25
   "Width of buffer"
   )
 
-(defvar fm-bookmark-enabled-file-manager '(kde4 gnome3 pcmanfm)
+(defvar fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm)
   "Enabled file managers")
 
 (defvar fm-bookmark-enable-mounted-media t
@@ -198,7 +199,7 @@ gnome3
 		    ((eq fm-symbol 'pcmanfm)
 		     (fm-bookmark-gtk-parser fm-symbol)))
 	      "\n")))
-   fm-bookmark-enabled-file-manager
+   fm-bookmark-enabled-file-managers
    "\n"))
 
 (defun fm-bookmark-open-this ()

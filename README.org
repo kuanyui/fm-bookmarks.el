@@ -1,0 +1,42 @@
+* fm-bookmark.el
+  Use existed file managers' bookmarks in Dired.
+
+** Introduce
+   If you're using Dired, you may want to directly access existed bookmarks in your prefered file manager (e.g. Dolphin, Nautilus, PCManFM) via Dired, without any redundant configuration for Dired or `balahbalah-bookmarks.el`. If so, =fm-bookmark.el= is just what you're looking for.
+
+    =fm-bookmark.el= also has an (experimental) feature to list mounted
+
+** Requirement
+   - Any of supported file managers. Currently available:
+     + Dolphin (KDE4)
+     + Nautilus (GNOME3)
+     + PCManFM (LXDE)
+
+** Installation
+
+#+BEGIN_SRC elisp
+(add-to-list 'load-path "/path/to/fm-bookmark.el")
+(require 'fm-bookmark)
+
+;; Available options: kde4, gnome3, pcmanfm
+;; Multiple file managers are acceptable.
+(setq fm-bookmark-enabled-file-managers '(kde4))
+
+;; Show external mounted media (Experimental, Linux only).
+(setq fm-bookmark-enable-mounted-media t)
+
+(global-set-key (kbd "C-c f m") #'fm-bookmark)
+;; Use ` to open in Dired-mode
+(define-key dired-mode-map (kbd "`") #'fm-bookmark)
+#+END_SRC
+
+** Todo List
+   - [ ] More supported FM.
+     + [ ] Windows Explorer?
+     + [ ] OSX Finder?
+   - [ ] Add/Edit/Delete bookmarks directly.
+   - [ ] Update modeline with cursor moving.
+   - [ ] Stay alive after opening link.
+
+** Known Issue
+   - Window may be resized after closing =fm-bookmark='s buffer.
