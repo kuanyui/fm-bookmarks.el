@@ -1,7 +1,4 @@
 * fm-bookmark.el
-#+BEGIN_QUOTE
-Currently under heavy development, don't use.
-#+END_QUOTE
 
   Use existed file managers' bookmarks in Dired.
 
@@ -18,7 +15,7 @@ Currently under heavy development, don't use.
 
 ** Screenshot
 
-[[https://farm8.staticflickr.com/7649/16821075989_b64f10b53c_o.png]]
+[[https://farm8.staticflickr.com/7607/16822969870_d2d18cc3ac_o.png]]
 
 ** Requirement
    - Any of supported file managers. Currently available:
