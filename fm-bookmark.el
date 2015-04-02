@@ -166,6 +166,9 @@ Output is like:
 
 (defun fm-bookmark-open-buffer ()
   (interactive)
+  (when (window-live-p (get-buffer-window fm-bookmark-buffer-name))
+    (switch-to-buffer (get-buffer fm-bookmark-buffer-name))
+    (kill-buffer-and-window))
   (select-window (window-at 0 0))
   (split-window-horizontally)
   (switch-to-buffer fm-bookmark-buffer-name)

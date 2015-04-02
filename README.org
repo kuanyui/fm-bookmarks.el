@@ -50,7 +50,7 @@
 | =Shift-Tab=  | Jump to previous category |
 |--------------+---------------------------|
 | =Up= , =p=   | Previous item             |
-| =Down= , =n= | Previous item             |
+| =Down= , =n= | Next item                 |
 
 ** Todo
    - [ ] Pattern to emit items.
