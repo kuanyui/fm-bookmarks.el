@@ -58,6 +58,7 @@
     ;; Element insertion
     (define-key map (kbd "q") '(lambda ()
 				 (interactive)
+				 (fm-bookmark-update-last-line-position)
 				 (delete-window (selected-window))
 				 ))
     (define-key map (kbd "h") 'describe-mode)
@@ -99,6 +100,9 @@ If t and system-type is Unix-like, show mounted media.
 gnome3 : Nautilus
 kde4 : Dolphin
 pcmanfm : PCManFM")
+
+(defvar fm-bookmark--last-line-position 0
+  "Internal use. Don't change.")
 
 ;; ======================================================
 ;; External Media (Experimental, Linux Only)
@@ -168,6 +172,7 @@ Output is like:
 	(insert (fm-bookmark-generate-media-list)))
     )
   (fm-bookmark-mode)
+  (goto-line fm-bookmark--last-line-position)
   ;; Disable linum
   (when (and (boundp 'linum-mode)
 	     (not (null linum-mode)))
@@ -205,14 +210,19 @@ gnome3
 
 (defun fm-bookmark-open-this ()
   (interactive)
+  (if (eolp) (left-char))
   (let ((link (get-text-property (point) 'href)))
     (if link
-	(progn (delete-window (selected-window))
+	(progn (fm-bookmark-update-last-line-position)
+	       (delete-window (selected-window))
 	       (kill-buffer fm-bookmark-buffer-name)
 	       (find-file-other-window link)
 	       )
       (message "There's no link"))
     ))
+
+(defun fm-bookmark-update-last-line-position ()
+  (setf fm-bookmark--last-line-position (line-number-at-pos)))
 
 ;; ======================================================
 ;; Parser
