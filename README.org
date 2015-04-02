@@ -35,10 +35,11 @@
 ;; Show external mounted media (Experimental, Linux only).
 (setq fm-bookmark-enable-mounted-media t)
 
-(global-set-key (kbd "C-c f m") #'fm-bookmark)
+(global-set-key (kbd "C-x `") #'fm-bookmark)
 ;; Use ` to open in Dired-mode
 (define-key dired-mode-map (kbd "`") #'fm-bookmark)
 #+END_SRC
+
 
 ** Todo List
    - [ ] Pattern to emit items.
