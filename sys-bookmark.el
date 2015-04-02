@@ -1,26 +1,31 @@
-;;; sys-bookmark.el --- Access existed FM bookmark in Dired  -*- lexical-binding: t; -*-
+;;; fm-bookmark.el --- Access existed FM bookmark in Dired  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  kuanyui
-
-;; Author: kuanyui <azazabc123@gmail.com>
+;; Author: hiroko <azazabc123@gmail.com>
 ;; Keywords: files, convenience
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; The MIT License (MIT)
+;; Copyright (C) 2015  hiroko
+;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;; of this software and associated documentation files (the "Software"), to deal
+;; in the Software without restriction, including without limitation the rights
+;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;; copies of the Software, and to permit persons to whom the Software is
+;; furnished to do so, subject to the following conditions:
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; The above copyright notice and this permission notice shall be included in
+;; all copies or substantial portions of the Software.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+;; THE SOFTWARE.
 
 ;;; Commentary:
 
-;;
+;; Open existed file managers' bookmarks with Dired.
 
 ;;; Code:
 
@@ -30,22 +35,22 @@
 ;; Major Mode
 ;; ======================================================
 
-(defgroup sys-bookmark nil
+(defgroup fm-bookmark nil
   "Access existed FM bookmark in Dired"
-  :prefix "sys-bookmark-"
-  :link '(url-link "http://github.com/kuanyui/sys-bookmark.el"))
+  :prefix "fm-bookmark-"
+  :link '(url-link "http://github.com/kuanyui/fm-bookmark.el"))
 
-(defgroup sys-bookmark-faces nil
-  "Faces used in sys-bookmark"
-  :group 'sys-bookmark
+(defgroup fm-bookmark-faces nil
+  "Faces used in fm-bookmark"
+  :group 'fm-bookmark
   :group 'faces)
 
-(defcustom sys-bookmark-mode-hook nil
-  "Normal hook run when entering sys-bookmark-mode."
+(defcustom fm-bookmark-mode-hook nil
+  "Normal hook run when entering fm-bookmark-mode."
   :type 'hook
-  :group 'sys-bookmark)
+  :group 'fm-bookmark)
 
-(defvar sys-bookmark-mode-map
+(defvar fm-bookmark-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Element insertion
     (define-key map (kbd "q") '(lambda ()
@@ -53,11 +58,11 @@
 				 (delete-window (selected-window))
 				 ))
     (define-key map (kbd "h") 'describe-mode)
-    (define-key map (kbd "RET") 'sys-bookmark-open-this)
+    (define-key map (kbd "RET") 'fm-bookmark-open-this)
     map)
   "Keymap for Moedict major mode.")   ;document
 
-(define-derived-mode sys-bookmark-mode nil "SysBookmarks"
+(define-derived-mode fm-bookmark-mode nil "SysBookmarks"
   "Major mode for looking up Chinese vocabulary via Moedict API."
   (set (make-local-variable 'buffer-read-only) t)
   (hl-line-mode t)
@@ -67,13 +72,13 @@
 ;; Variables
 ;; ======================================================
 
-(defvar sys-bookmark-buffer-name "*SysBookmarks*"
+(defvar fm-bookmark-buffer-name "*SysBookmarks*"
   "Name of the buffer.")
 
-(defvar sys-bookmark-enabled-file-manager '(kde4 gnome3 pcmanfm)
+(defvar fm-bookmark-enabled-file-manager '(kde4 gnome3 pcmanfm)
   "Enabled file managers")
 
-(defvar sys-bookmark-supported-file-managers
+(defvar fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
     (gnome3	.	"~/.config/gtk-3.0/bookmarks")
     (pcmanfm	.	"~/.gtk-bookmarks"))
@@ -83,10 +88,26 @@ kde4 : Dolphin
 pcmanfm : PCManFM")
 
 ;; ======================================================
+;; External Media (Experimental, Linux Only)
+;; ======================================================
+
+(benchmark-run 100
+
+  (with-temp-buffer
+    (insert-file-contents "/etc/mtab")
+    (mapcar
+     (lambda (line)
+       (let (( splitted-line (split-string line " ") ))
+	 (cons (nth 0 splitted-line) (nth 1 splitted-line))))
+     (split-string (buffer-string) "\n")))
+
+  )
+
+;; ======================================================
 ;; Main
 ;; ======================================================
 
-(defun sys-bookmark--set-width (window n)
+(defun fm-bookmark--set-width (window n)
   "Make window N columns width."
   (let ((w (max n window-min-width)))
     (unless (null window)
@@ -94,27 +115,27 @@ pcmanfm : PCManFM")
           (shrink-window-horizontally (- (window-width) w))
         (if (< (window-width) w)
             (enlarge-window-horizontally (- w (window-width))))))))
-(defalias 'sys-bookmark #'sys-bookmark-open-buffer)
+(defalias 'fm-bookmark #'fm-bookmark-open-buffer)
 
-(defun sys-bookmark-open-buffer ()
+(defun fm-bookmark-open-buffer ()
   (interactive)
   (split-window-horizontally)
-  (switch-to-buffer sys-bookmark-buffer-name)
+  (switch-to-buffer fm-bookmark-buffer-name)
   (kill-all-local-variables)
-  (sys-bookmark--set-width (selected-window) 25)
+  (fm-bookmark--set-width (selected-window) 25)
   (let (buffer-read-only)
     (erase-buffer)
     (set-window-dedicated-p (selected-window) t)
-    (insert (sys-bookmark-generate-list))
+    (insert (fm-bookmark-generate-list))
     )
-  (sys-bookmark-mode)
+  (fm-bookmark-mode)
   ;; Disable linum
   (when (and (boundp 'linum-mode)
              (not (null linum-mode)))
     (linum-mode -1))
   )
 
-(defun sys-bookmark-generate-list ()
+(defun fm-bookmark-generate-list ()
   "Generate a formatted dir list with text propertized.
 kde4
   dir1
@@ -134,21 +155,21 @@ gnome3
 			    'face 'dired-directory
 			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
 	      (cond ((eq fm-symbol 'kde4)
-		     (sys-bookmark-kde4-parser))
+		     (fm-bookmark-kde4-parser))
 		    ((eq fm-symbol 'gnome3)
-		     (sys-bookmark-gtk-parser fm-symbol))
+		     (fm-bookmark-gtk-parser fm-symbol))
 		    ((eq fm-symbol 'pcmanfm)
-		     (sys-bookmark-gtk-parser fm-symbol)))
+		     (fm-bookmark-gtk-parser fm-symbol)))
 	      "\n")))
-   sys-bookmark-enabled-file-manager
+   fm-bookmark-enabled-file-manager
    "\n"))
 
-(defun sys-bookmark-open-this ()
+(defun fm-bookmark-open-this ()
   (interactive)
   (let ((link (get-text-property (point) 'href)))
     (if link
 	(progn (delete-window (selected-window))
-	       (kill-buffer sys-bookmark-buffer-name)
+	       (kill-buffer fm-bookmark-buffer-name)
 	       (find-file-other-window link)
 	       )
       (message "There's no link"))
@@ -158,8 +179,8 @@ gnome3
 ;; Parser
 ;; ======================================================
 
-(defun sys-bookmark-kde4-parser ()
-  (let* ((root (xml-parse-file (cdr (assoc 'kde4 sys-bookmark-supported-file-managers))))
+(defun fm-bookmark-kde4-parser ()
+  (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmark-supported-file-managers))))
 	 (bookmarks (xml-get-children (car root) 'bookmark)))
     (remove-if
      #'null
@@ -180,10 +201,10 @@ gnome3
      )))
 
 
-(defun sys-bookmark-gtk-parser (symbol)
+(defun fm-bookmark-gtk-parser (symbol)
   "Available arg: 'gnome3 'pcmanfm"
   (with-temp-buffer
-    (insert-file-contents (cdr (assoc symbol sys-bookmark-supported-file-managers)))
+    (insert-file-contents (cdr (assoc symbol fm-bookmark-supported-file-managers)))
     (mapcar
      (lambda (str)
        (let* ((line (split-string str " " t))
@@ -200,5 +221,5 @@ gnome3
 
 
 
-(provide 'sys-bookmark)
-;;; sys-bookmark.el ends here
+(provide 'fm-bookmark)
+;;; fm-bookmark.el ends here
