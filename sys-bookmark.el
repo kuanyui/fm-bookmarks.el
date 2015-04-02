@@ -48,7 +48,10 @@
 (defvar sys-bookmark-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Element insertion
-    (define-key map (kbd "q") 'quit-window)
+    (define-key map (kbd "q") '(lambda ()
+				 (interactive)
+				 (delete-window (selected-window))
+				 ))
     (define-key map (kbd "h") 'describe-mode)
     (define-key map (kbd "RET") 'sys-bookmark-open-this)
     map)
@@ -58,7 +61,6 @@
   "Major mode for looking up Chinese vocabulary via Moedict API."
   (set (make-local-variable 'buffer-read-only) t)
   (hl-line-mode t)
-
   )
 
 ;; ======================================================
@@ -68,7 +70,7 @@
 (defvar sys-bookmark-buffer-name "*SysBookmarks*"
   "Name of the buffer.")
 
-(defvar sys-bookmark-enabled-file-manager '()
+(defvar sys-bookmark-enabled-file-manager '(kde4 gnome3 pcmanfm)
   "Enabled file managers")
 
 (defvar sys-bookmark-supported-file-managers
@@ -84,30 +86,73 @@ pcmanfm : PCManFM")
 ;; Main
 ;; ======================================================
 
-(defun sys-bookmark-buffer-name ()
-  (generate-new-buffer-name sys-bookmark-buffer-name))
+(defun sys-bookmark--set-width (window n)
+  "Make window N columns width."
+  (let ((w (max n window-min-width)))
+    (unless (null window)
+      (if (> (window-width) w)
+          (shrink-window-horizontally (- (window-width) w))
+        (if (< (window-width) w)
+            (enlarge-window-horizontally (- w (window-width))))))))
+(defalias 'sys-bookmark #'sys-bookmark-open-buffer)
 
 (defun sys-bookmark-open-buffer ()
   (interactive)
-  (switch-to-buffer (sys-bookmark-buffer-name))
+  (split-window-horizontally)
+  (switch-to-buffer sys-bookmark-buffer-name)
+  (kill-all-local-variables)
+  (sys-bookmark--set-width (selected-window) 25)
   (let (buffer-read-only)
     (erase-buffer)
+    (set-window-dedicated-p (selected-window) t)
     (insert (sys-bookmark-generate-list))
     )
-  (sys-bookmark-mode))
+  (sys-bookmark-mode)
+  ;; Disable linum
+  (when (and (boundp 'linum-mode)
+             (not (null linum-mode)))
+    (linum-mode -1))
+  )
 
 (defun sys-bookmark-generate-list ()
-  (mapconcat (lambda (item)
-	       (propertize (car item)
-			   'face 'dired-directory
-			   'href (replace-regexp-in-string "^file://" "" (cdr item))))
-	     (sys-bookmark-kde4-parser)
-	     "\n"))
+  "Generate a formatted dir list with text propertized.
+kde4
+  dir1
+  dir2
+gnome3
+  dir1
+  dir2
+ "
+  (mapconcat
+   (lambda (fm-symbol)		;kde4, gnome3...etc
+     (concat (propertize (symbol-name fm-symbol)
+			 'face 'font-lock-comment-face)
+	     "\n"
+	     (mapconcat
+	      (lambda (item)
+		(propertize (concat "  " (car item))
+			    'face 'dired-directory
+			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
+	      (cond ((eq fm-symbol 'kde4)
+		     (sys-bookmark-kde4-parser))
+		    ((eq fm-symbol 'gnome3)
+		     (sys-bookmark-gtk-parser fm-symbol))
+		    ((eq fm-symbol 'pcmanfm)
+		     (sys-bookmark-gtk-parser fm-symbol)))
+	      "\n")))
+   sys-bookmark-enabled-file-manager
+   "\n"))
 
 (defun sys-bookmark-open-this ()
   (interactive)
-  (dired (get-text-property (point) 'href))
-  )
+  (let ((link (get-text-property (point) 'href)))
+    (if link
+	(progn (delete-window (selected-window))
+	       (kill-buffer sys-bookmark-buffer-name)
+	       (find-file-other-window link)
+	       )
+      (message "There's no link"))
+    ))
 
 ;; ======================================================
 ;; Parser
