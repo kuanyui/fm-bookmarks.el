@@ -179,9 +179,10 @@ Output is like:
 		   (match-string 2 line)
 		   )
 	     ))
-	 (split-string
-	  (substring (shell-command-to-string "mount | grep 'media'") 0 -1) ;fuck you elisp
-	  "\n"))
+         (let ((cmd-output (shell-command-to-string "mount | grep 'media'")))
+           (if (> (length cmd-output) 2)
+               (split-string (substring cmd-output 0 -1) "\n") ;fuck you elisp
+             ())))
  :test (lambda (a b) (equal (car a) (car b)))))
 
 (defun fm-bookmark-generate-media-pair-list ()

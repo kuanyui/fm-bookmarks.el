@@ -62,7 +62,6 @@
 
 ** Todo
    - [ ] Pattern to emit items.
-   - [ ] Customized item.
    - [ ] More supported FM.
      + [ ] Windows Explorer?
      + [ ] OSX Finder?
