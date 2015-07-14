@@ -61,12 +61,12 @@
 | =Down= , =n= | Next item                 |
 
 ** Todo
-   - [ ] Pattern to hide items.
+   - [X] Pattern to hide items.
    - [X] Hide duplicated item
    - [ ] Don't generate list every time.
    - [ ] More supported FM.
      + [ ] Windows Explorer?
      + [ ] OSX Finder?
    - [ ] Update modeline with cursor moving (To show info of the path).
-   - [ ] Stay alive after opening link
+   - [ ] Stay alive after opening link?
      

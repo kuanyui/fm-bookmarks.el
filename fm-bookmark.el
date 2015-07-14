@@ -137,10 +137,10 @@ OS X)
   "Record seen paths to prevent duplicated paths. This is NOT
   intend to be changed manually."  )
 
-(defvar fm-bookmark-hide-name-pattern '()
-  "Patterns to hide.")
-(defvar fm-bookmark-hide-path-pattern '()
-  "Patterns to hide.")
+(defvar fm-bookmark-hide-by-name-pattern '("Bluetooth")
+  "Patterns to hide (by name).")
+(defvar fm-bookmark-hide-by-path-pattern '()
+  "Patterns to hide (by path).")
 
 (defconst fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
@@ -266,26 +266,32 @@ gnome3
 	     (mapconcat
 	      (lambda (item)
                 (let ((path (replace-regexp-in-string "^file://" "" (cdr item))))
-                  (if (and fm-bookmark-hide-duplicated
-                           (member path fm-bookmark--seen-path))
-                      ""
-                    (progn (push path fm-bookmark--seen-path)
-                           (propertize (concat "  " (car item) "\n")
-                                       'face (fm-bookmark-get-face fm-symbol)
-                                       'href path)))))
-	      (cond ((eq fm-symbol 'kde4)
-		     (fm-bookmark-kde4-parser))
-		    ((eq fm-symbol 'gnome3)
-		     (fm-bookmark-gtk-parser fm-symbol))
-		    ((eq fm-symbol 'pcmanfm)
-		     (fm-bookmark-gtk-parser fm-symbol))
-		    ((eq fm-symbol 'custom)
-		     fm-bookmark-custom-bookmarks)
-		    ((eq fm-symbol 'media)
-		     (fm-bookmark-generate-media-pair-list)
-		     )
-		    )
-	      "")))
+                  (cond ((and fm-bookmark-hide-duplicated
+                              (member path fm-bookmark--seen-path))
+                         "")
+                        ;; Patterns to hide items
+                        ((some (lambda (patt) (string-match patt path)) fm-bookmark-hide-by-path-pattern)
+                         "")
+                        ((some (lambda (patt) (string-match patt (car item))) fm-bookmark-hide-by-name-pattern)
+                         "")
+                        (t
+                         (progn (push path fm-bookmark--seen-path)
+                                (propertize (concat "  " (car item) "\n")
+                                            'face (fm-bookmark-get-face fm-symbol)
+                                            'href path))))))
+              (cond ((eq fm-symbol 'kde4)
+                     (fm-bookmark-kde4-parser))
+                    ((eq fm-symbol 'gnome3)
+                     (fm-bookmark-gtk-parser fm-symbol))
+                    ((eq fm-symbol 'pcmanfm)
+                     (fm-bookmark-gtk-parser fm-symbol))
+                    ((eq fm-symbol 'custom)
+                     fm-bookmark-custom-bookmarks)
+                    ((eq fm-symbol 'media)
+                     (fm-bookmark-generate-media-pair-list)
+                     )
+                    )
+              "")))
    fm-bookmark-enabled-file-managers
    ""))
 
