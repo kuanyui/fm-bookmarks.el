@@ -131,8 +131,16 @@ Notice that 'media is only available on Unix-like OS (exclude Mac
 OS X)
 ")
 
+(defvar fm-bookmark-hide-duplicated t
+  "Hide duplicated path.")
+(defvar fm-bookmark--seen-path '()
+  "Record seen paths to prevent duplicated paths. This is NOT
+  intend to be changed manually."  )
 
-
+(defvar fm-bookmark-hide-name-pattern '()
+  "Patterns to hide.")
+(defvar fm-bookmark-hide-path-pattern '()
+  "Patterns to hide.")
 
 (defconst fm-bookmark-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
@@ -240,7 +248,7 @@ Output is like:
      (make-string (- fm-bookmark-buffer-width (+ 2 (length display-name))) ?=)
      "\n"
      )))
-
+;;(setq fm-bookmark-hide-duplicated t)
 (defun fm-bookmark-generate-list ()
   "Generate a formatted dir list with text propertized.
 kde4
@@ -250,15 +258,21 @@ gnome3
   dir1
   dir2
  "
+  (setq fm-bookmark--seen-path '())
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
      (concat (propertize (fm-bookmark-symbol-to-title fm-symbol)
 			 'face 'fm-bookmark-title)
 	     (mapconcat
 	      (lambda (item)
-		(propertize (concat "  " (car item) "\n")
-			    'face (fm-bookmark-get-face fm-symbol)
-			    'href (replace-regexp-in-string "^file://" "" (cdr item))))
+                (let ((path (replace-regexp-in-string "^file://" "" (cdr item))))
+                  (if (and fm-bookmark-hide-duplicated
+                           (member path fm-bookmark--seen-path))
+                      ""
+                    (progn (push path fm-bookmark--seen-path)
+                           (propertize (concat "  " (car item) "\n")
+                                       'face (fm-bookmark-get-face fm-symbol)
+                                       'href path)))))
 	      (cond ((eq fm-symbol 'kde4)
 		     (fm-bookmark-kde4-parser))
 		    ((eq fm-symbol 'gnome3)
@@ -334,8 +348,8 @@ gnome3
       (previous-line)))
 
 ;; ======================================================
-;; ======================================================
 ;; Parser
+;; ======================================================
 
 (defun fm-bookmark-kde4-parser ()
   (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmark-supported-file-managers))))
