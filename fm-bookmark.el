@@ -62,6 +62,7 @@
 				 (kill-buffer-and-window)
 				 ))
     (define-key map (kbd "h") 'describe-mode)
+    (define-key map (kbd "g") 'fm-bookmark-refresh)
     (define-key map (kbd "RET") 'fm-bookmark-open-this)
     (define-key map (kbd "TAB") 'fm-bookmark-next-category)
     (define-key map (kbd "<backtab>") 'fm-bookmark-previous-category)
@@ -130,6 +131,10 @@ Available options: '(kde4 gnome3 pcmanfm custom media)
 Notice that 'media is only available on Unix-like OS (exclude Mac
 OS X)
 ")
+
+(defvar fm-bookmark--cache nil
+  "Used to store generated propertized & formatted list, which to
+  prevent unnecessarily re-generate. DON'T CHANGE THIS." )
 
 (defvar fm-bookmark-hide-duplicated t
   "Hide duplicated path.")
@@ -229,7 +234,8 @@ Output is like:
   (set-window-dedicated-p (selected-window) t)
   (let (buffer-read-only)
     (erase-buffer)
-    (insert (fm-bookmark-generate-list))
+    (insert (or fm-bookmark--cache
+                (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list))))
     )
   (fm-bookmark-mode)
   (goto-line fm-bookmark--last-line-position)
@@ -248,13 +254,27 @@ Output is like:
      (make-string (- fm-bookmark-buffer-width (+ 2 (length display-name))) ?=)
      "\n"
      )))
-;;(setq fm-bookmark-hide-duplicated t)
-(defun fm-bookmark-generate-list ()
+
+(defun fm-bookmark-refresh ()
+  (interactive)
+  (if (equal (buffer-name) fm-bookmark-buffer-name)
+      (let ((buffer-read-only nil)
+            (curr-point (point)))
+        (delete-region (point-min) (point-max))
+        (message "Refreshing...")
+        (insert
+         (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list)))
+        (goto-char curr-point)
+        (message "Done!")
+        )
+    (message "Sorry, this function should be only used in FM bookmark buffer.")))
+
+(defun fm-bookmark-generate-propertized-list ()
   "Generate a formatted dir list with text propertized.
-kde4
+kde4 =======
   dir1
   dir2
-gnome3
+gnome3 =====
   dir1
   dir2
  "

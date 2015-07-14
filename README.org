@@ -52,6 +52,7 @@
 | Key          | Description               |
 |--------------+---------------------------|
 | =Enter=      | Open this directory       |
+| =g=          | Refresh list              |
 | =q=          | Close and quit            |
 |--------------+---------------------------|
 | =Tab=        | Jump to next category     |
@@ -63,7 +64,7 @@
 ** Todo
    - [X] Pattern to hide items.
    - [X] Hide duplicated item
-   - [ ] Don't generate list every time.
+   - [X] Don't generate list every time.
    - [ ] More supported FM.
      + [ ] Windows Explorer?
      + [ ] OSX Finder?
