@@ -1,7 +1,11 @@
-;;; fm-bookmark.el --- Access existed FM bookmark in Dired  -*- lexical-binding: t; -*-
+;;; fm-bookmark.el --- Access existed FM bookmarks (ex: Dolphin, Nautilus, PCManFM) via Dired  -*- lexical-binding: t; -*-
 
-;; Author: hiroko <azazabc123@gmail.com>
+;; Author: Ono Hiroko <azazabc123@gmail.com>
 ;; Keywords: files, convenience
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
+;; X-URL: http://github.com/kuanyui/fm-bookmark.el
+;; Version: 0.1
+;; Keywords: tools
 
 ;; The MIT License (MIT)
 ;; Copyright (C) 2015  hiroko
@@ -25,8 +29,26 @@
 
 ;;; Commentary:
 
+;; For more detailed configuration & usage, visit:
+;; https://github.com/kuanyui/fm-bookmark.el
+
 ;; Use existed bookmarks of file managers (e.g. Dolphin, Nautilus,
 ;; PCManFM) in Dired.
+
+;;   (add-to-list 'load-path "/path/to/fm-bookmark.el")
+;;   (require 'fm-bookmark)
+;;   (setq fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
+;;
+;;   ;; Add customized bookmarks
+;;   (setq fm-bookmark-custom-bookmarks
+;;         '(("Root" . "/")
+;;           ("Tmp" . "/tmp/")
+;;           ))
+;;   ;; Shortcut to open FM bookmark.
+;;   (global-set-key (kbd "C-x `") #'fm-bookmark)
+;;   ;; Use ` to open FM bookmark in Dired-mode
+;;   (define-key dired-mode-map (kbd "`") #'fm-bookmark)
+
 
 ;;; Code:
 
