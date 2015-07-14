@@ -1,4 +1,4 @@
-* fm-bookmark.el
+* fm-bookmarks.el
 
   Use existed file managers' bookmarks in Dired.
 
@@ -6,10 +6,10 @@
    If you're using Dired, you may want to directly access existed
    bookmarks in your prefered file manager (e.g. Dolphin, Nautilus,
    PCManFM) via Dired, without any redundant configuration for Dired
-   or `balahbalah-bookmarks.el`. If so, =fm-bookmark.el= is just what
+   or `balahbalah-bookmarks.el`. If so, =fm-bookmarks.el= is just what
    you're looking for.
 
-   =fm-bookmark.el= also has an experimental feature to list mounted
+   =fm-bookmarks.el= also has an experimental feature to list mounted
    media (via =mount= shell command, due to the limitation of the crap
    Emacs Lisp).
 
@@ -26,39 +26,39 @@
 ** Installation
 
 #+BEGIN_SRC elisp
-  (add-to-list 'load-path "/path/to/fm-bookmark.el")
-  (require 'fm-bookmark)
+  (add-to-list 'load-path "/path/to/fm-bookmarks.el")
+  (require 'fm-bookmarks)
 
   ;; Available options: kde4, gnome3, pcmanfm, custom
   ;; Multiple file managers are acceptable.
   ;; Notice that 'media currently is only available on Unix-like OS
-  (setq fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
+  (setq fm-bookmarks-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
 
   ;; Add customized bookmarks
-  (setq fm-bookmark-custom-bookmarks
+  (setq fm-bookmarks-custom-bookmarks
         '(("Root" . "/")
           ("Tmp" . "/tmp/")
           ))
 
   ;; Hide item by name/path pattern
-  (setq fm-bookmark-hide-by-name-pattern '("Bluetooth" "Images"))
-  (setq fm-bookmark-hide-by-path-pattern '())
+  (setq fm-bookmarks-hide-by-name-pattern '("Bluetooth" "Images"))
+  (setq fm-bookmarks-hide-by-path-pattern '())
 
   ;; Don't show duplicated item. (Because the same path may be added by
   ;; different FMs)
-  (defvar fm-bookmark-hide-duplicated t)
+  (defvar fm-bookmarks-hide-duplicated t)
 
   ;; "Mounted media" is an experimental function. If you don't want
   ;; this, set this to nil.
-  (setq fm-bookmark-enable-mounted-media t)
+  (setq fm-bookmarks-enable-mounted-media t)
 
   ;; Use cache to avoid regenerating list every time.
-  (setq fm-bookmark-enable-cache t)
+  (setq fm-bookmarks-enable-cache t)
 
   ;; Shortcut to open FM bookmark.
-  (global-set-key (kbd "C-x `") #'fm-bookmark)
+  (global-set-key (kbd "C-x `") #'fm-bookmarks)
   ;; Use ` to open FM bookmark in Dired-mode
-  (define-key dired-mode-map (kbd "`") #'fm-bookmark)
+  (define-key dired-mode-map (kbd "`") #'fm-bookmarks)
 #+END_SRC
 
 ** Usage

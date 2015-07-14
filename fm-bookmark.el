@@ -1,9 +1,9 @@
-;;; fm-bookmark.el --- Access existed FM bookmarks (ex: Dolphin, Nautilus, PCManFM) via Dired  -*- lexical-binding: t; -*-
+;;; fm-bookmarks.el --- Access existed FM bookmarks (ex: Dolphin, Nautilus, PCManFM) via Dired  -*- lexical-binding: t; -*-
 
 ;; Author: Ono Hiroko <azazabc123@gmail.com>
 ;; Keywords: files, convenience
 ;; Package-Requires: ((emacs "24.3") (cl-lib "0.5"))
-;; X-URL: http://github.com/kuanyui/fm-bookmark.el
+;; X-URL: http://github.com/kuanyui/fm-bookmarks.el
 ;; Version: 0.1
 ;; Keywords: tools
 
@@ -30,24 +30,24 @@
 ;;; Commentary:
 
 ;; For more detailed configuration & usage, visit:
-;; https://github.com/kuanyui/fm-bookmark.el
+;; https://github.com/kuanyui/fm-bookmarks.el
 
 ;; Use existed bookmarks of file managers (e.g. Dolphin, Nautilus,
 ;; PCManFM) in Dired.
 
-;;   (add-to-list 'load-path "/path/to/fm-bookmark.el")
-;;   (require 'fm-bookmark)
-;;   (setq fm-bookmark-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
+;;   (add-to-list 'load-path "/path/to/fm-bookmarks.el")
+;;   (require 'fm-bookmarks)
+;;   (setq fm-bookmarks-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
 ;;
 ;;   ;; Add customized bookmarks
-;;   (setq fm-bookmark-custom-bookmarks
+;;   (setq fm-bookmarks-custom-bookmarks
 ;;         '(("Root" . "/")
 ;;           ("Tmp" . "/tmp/")
 ;;           ))
 ;;   ;; Shortcut to open FM bookmark.
-;;   (global-set-key (kbd "C-x `") #'fm-bookmark)
+;;   (global-set-key (kbd "C-x `") #'fm-bookmarks)
 ;;   ;; Use ` to open FM bookmark in Dired-mode
-;;   (define-key dired-mode-map (kbd "`") #'fm-bookmark)
+;;   (define-key dired-mode-map (kbd "`") #'fm-bookmarks)
 
 
 ;;; Code:
@@ -60,40 +60,40 @@
 ;; Major Mode
 ;; ======================================================
 
-(defgroup fm-bookmark nil
+(defgroup fm-bookmarks nil
   "Access existed FM bookmark in Dired"
-  :prefix "fm-bookmark-"
-  :link '(url-link "http://github.com/kuanyui/fm-bookmark.el"))
+  :prefix "fm-bookmarks-"
+  :link '(url-link "http://github.com/kuanyui/fm-bookmarks.el"))
 
-(defgroup fm-bookmark-faces nil
-  "Faces used in fm-bookmark"
-  :group 'fm-bookmark
+(defgroup fm-bookmarks-faces nil
+  "Faces used in fm-bookmarks"
+  :group 'fm-bookmarks
   :group 'faces)
 
-(defcustom fm-bookmark-mode-hook nil
-  "Normal hook run when entering fm-bookmark-mode."
+(defcustom fm-bookmarks-mode-hook nil
+  "Normal hook run when entering fm-bookmarks-mode."
   :type 'hook
-  :group 'fm-bookmark)
+  :group 'fm-bookmarks)
 
-(defvar fm-bookmark-mode-map
+(defvar fm-bookmarks-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Element insertion
     (define-key map (kbd "q") '(lambda ()
 				 (interactive)
-				 (fm-bookmark-update-last-line-position)
+				 (fm-bookmarks-update-last-line-position)
 				 (kill-buffer-and-window)
 				 ))
     (define-key map (kbd "h") 'describe-mode)
-    (define-key map (kbd "g") 'fm-bookmark-refresh)
-    (define-key map (kbd "RET") 'fm-bookmark-open-this)
-    (define-key map (kbd "TAB") 'fm-bookmark-next-category)
-    (define-key map (kbd "<backtab>") 'fm-bookmark-previous-category)
-    (define-key map (kbd "<up>") 'fm-bookmark-previous-line)
-    (define-key map (kbd "<down>") 'fm-bookmark-next-line)
+    (define-key map (kbd "g") 'fm-bookmarks-refresh)
+    (define-key map (kbd "RET") 'fm-bookmarks-open-this)
+    (define-key map (kbd "TAB") 'fm-bookmarks-next-category)
+    (define-key map (kbd "<backtab>") 'fm-bookmarks-previous-category)
+    (define-key map (kbd "<up>") 'fm-bookmarks-previous-line)
+    (define-key map (kbd "<down>") 'fm-bookmarks-next-line)
     map)
   "")   ;document
 
-(define-derived-mode fm-bookmark-mode nil "FM Bookmarks"
+(define-derived-mode fm-bookmarks-mode nil "FM Bookmarks"
   ""
   (set (make-local-variable 'buffer-read-only) t)
   (hl-line-mode t)
@@ -102,35 +102,35 @@
 ;; ======================================================
 ;; Faces
 ;; ======================================================
-(defgroup fm-bookmark-faces nil
+(defgroup fm-bookmarks-faces nil
   ""
-  :group 'fm-bookmark
+  :group 'fm-bookmarks
   :group 'faces)
 
-(defface fm-bookmark-title
+(defface fm-bookmarks-title
   '((((class color) (background light)) (:foreground "#808080"))
     (((class color) (background dark)) (:foreground "#a0a0a0")))
-  "" :group 'fm-bookmark-faces)
+  "" :group 'fm-bookmarks-faces)
 
-(defface fm-bookmark-file-manager
+(defface fm-bookmarks-file-manager
   '((((class color) (background light)) (:bold t :foreground "#6faaff"))
     (((class color) (background dark)) (:bold t :foreground "#6faaff")))
-  "" :group 'fm-bookmark-faces)
+  "" :group 'fm-bookmarks-faces)
 
-(defface fm-bookmark-custom
+(defface fm-bookmarks-custom
   '((((class color) (background light)) (:bold t :foreground "#5fd700"))
     (((class color) (background dark)) (:bold t :foreground "#a1db00")))
-  "" :group 'fm-bookmark-faces)
+  "" :group 'fm-bookmarks-faces)
 
-(defface fm-bookmark-media
+(defface fm-bookmarks-media
   '((((class color) (background light)) (:bold t :foreground "#ff4ea3"))
     (((class color) (background dark)) (:bold t :foreground "#ff6fa5")))
-  "" :group 'fm-bookmark-faces)
+  "" :group 'fm-bookmarks-faces)
 
-(defun fm-bookmark-get-face (symbol)
-  (cdr (assoc* symbol '(((kde4 gnome3 pcmanfm)	. fm-bookmark-file-manager)
-			((media)		. fm-bookmark-media)
-			((custom)		. fm-bookmark-custom))
+(defun fm-bookmarks-get-face (symbol)
+  (cdr (assoc* symbol '(((kde4 gnome3 pcmanfm)	. fm-bookmarks-file-manager)
+			((media)		. fm-bookmarks-media)
+			((custom)		. fm-bookmarks-custom))
 	       :test (lambda (sym pair) (memq sym pair))
 	       )))
 
@@ -138,16 +138,16 @@
 ;; Variables
 ;; ======================================================
 
-(defvar fm-bookmark-buffer-name "*FM Bookmarks*"
+(defvar fm-bookmarks-buffer-name "*FM Bookmarks*"
   "Name of the buffer.")
 
-(defvar fm-bookmark-buffer-width 25
+(defvar fm-bookmarks-buffer-width 25
   "Width of buffer"
   )
 
-(defvar fm-bookmark-enabled-file-managers '(kde4 custom media)
+(defvar fm-bookmarks-enabled-file-managers '(kde4 custom media)
   "Enabled file managers/items. Ordering is sensitive.
-Add custom bookmarks manually via `fm-bookmark-custom-bookmarks'.
+Add custom bookmarks manually via `fm-bookmarks-custom-bookmarks'.
 Available options: '(kde4 gnome3 pcmanfm custom media)
 
 Notice that 'media is only available on Unix-like OS (exclude Mac
@@ -155,29 +155,29 @@ OS X)
 ")
 
 
-(defvar fm-bookmark-enable-cache t
+(defvar fm-bookmarks-enable-cache t
   "Use cache to avoid re-generating list every time.")
-(defvar fm-bookmark--cache nil
+(defvar fm-bookmarks--cache nil
   "Used to store generated propertized & formatted list, which to
   prevent unnecessarily re-generate. DON'T CHANGE THIS." )
 
-(defvar fm-bookmark-hide-duplicated t
+(defvar fm-bookmarks-hide-duplicated t
   "Hide duplicated path.")
-(defvar fm-bookmark--seen-path '()
+(defvar fm-bookmarks--seen-path '()
   "Record seen paths to prevent duplicated paths. This is NOT
   intend to be changed manually."  )
 
-(defvar fm-bookmark-hide-by-name-pattern '("Bluetooth")
+(defvar fm-bookmarks-hide-by-name-pattern '("Bluetooth")
   "Patterns to hide (by name).")
-(defvar fm-bookmark-hide-by-path-pattern '()
+(defvar fm-bookmarks-hide-by-path-pattern '()
   "Patterns to hide (by path).")
 
-(defconst fm-bookmark-supported-file-managers
+(defconst fm-bookmarks-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
     (gnome3	.	"~/.config/gtk-3.0/bookmarks")
     (pcmanfm	.	"~/.gtk-bookmarks")))
 
-(defvar fm-bookmark-file-managers-display-name
+(defvar fm-bookmarks-file-managers-display-name
   '((kde4	.	"Dolphin")
     (gnome3	.	"Nautilus")
     (pcmanfm	.	"PCManFM")
@@ -187,23 +187,23 @@ OS X)
   "Display names of each file manager"
   )
 
-(defvar fm-bookmark-custom-bookmarks nil
+(defvar fm-bookmarks-custom-bookmarks nil
   "Besides the bookmarks grabbed from file managers, you can also
   add other new bookmarks manually. Example:
   '((\"Root\" . \"/\")
     (\"Dir Name\" . \"/path/to/dir\" ))
 
 Finally, please remember to add 'custom into
-`fm-bookmark-enabled-file-managers'" )
+`fm-bookmarks-enabled-file-managers'" )
 
-(defvar fm-bookmark--last-line-position 0
+(defvar fm-bookmarks--last-line-position 0
   "Internal use. Don't change.")
 
 ;; ======================================================
 ;; External Media (Experimental, Linux Only)
 ;; ======================================================
 
-(defun fm-bookmark-get-and-parse-media-list ()
+(defun fm-bookmarks-get-and-parse-media-list ()
   "Get raw list from `mount` command and parse.
 Output is like:
 ((\"/dev/sdb1\" . \"/var/run/media/kuanyui/kuanyui\")
@@ -223,12 +223,12 @@ Output is like:
              ())))
  :test (lambda (a b) (equal (car a) (car b)))))
 
-(defun fm-bookmark-generate-media-pair-list ()
+(defun fm-bookmarks-generate-media-pair-list ()
   (if (member system-type '(gnu gnu/linux gnu/kfreebsd cygwin))
       (mapcar (lambda (x)
 		(cons (file-name-base (cdr x)) (cdr x))
 		)
-	      (fm-bookmark-get-and-parse-media-list)
+	      (fm-bookmarks-get-and-parse-media-list)
 	      )
     ))
 
@@ -236,7 +236,7 @@ Output is like:
 ;; Main
 ;; ======================================================
 
-(defun fm-bookmark--set-width (window n)
+(defun fm-bookmarks--set-width (window n)
   "Make window N columns width."
   (let ((w (max n window-min-width)))
     (unless (null window)
@@ -244,58 +244,58 @@ Output is like:
 	  (shrink-window-horizontally (- (window-width) w))
 	(if (< (window-width) w)
 	    (enlarge-window-horizontally (- w (window-width))))))))
-(defalias 'fm-bookmark #'fm-bookmark-open-buffer)
+(defalias 'fm-bookmarks #'fm-bookmarks-open-buffer)
 
-(defun fm-bookmark-open-buffer ()
+(defun fm-bookmarks-open-buffer ()
   (interactive)
-  (when (window-live-p (get-buffer-window fm-bookmark-buffer-name))
-    (switch-to-buffer (get-buffer fm-bookmark-buffer-name))
+  (when (window-live-p (get-buffer-window fm-bookmarks-buffer-name))
+    (switch-to-buffer (get-buffer fm-bookmarks-buffer-name))
     (kill-buffer-and-window))
   (select-window (window-at 0 0))
   (split-window-horizontally)
-  (switch-to-buffer fm-bookmark-buffer-name)
+  (switch-to-buffer fm-bookmarks-buffer-name)
   (kill-all-local-variables)
-  (fm-bookmark--set-width (selected-window) fm-bookmark-buffer-width)
+  (fm-bookmarks--set-width (selected-window) fm-bookmarks-buffer-width)
   (set-window-dedicated-p (selected-window) t)
   (let (buffer-read-only)
     (erase-buffer)
-    (if fm-bookmark-enable-cache
-        (insert (or fm-bookmark--cache
-                    (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list))))
-      (insert (fm-bookmark-generate-propertized-list))))
-  (fm-bookmark-mode)
-  (goto-line fm-bookmark--last-line-position)
+    (if fm-bookmarks-enable-cache
+        (insert (or fm-bookmarks--cache
+                    (setq fm-bookmarks--cache (fm-bookmarks-generate-propertized-list))))
+      (insert (fm-bookmarks-generate-propertized-list))))
+  (fm-bookmarks-mode)
+  (goto-line fm-bookmarks--last-line-position)
   ;; Disable linum
   (when (and (boundp 'linum-mode)
 	     (not (null linum-mode)))
     (linum-mode -1))
   )
 
-(defun fm-bookmark-symbol-to-title (symbol)
+(defun fm-bookmarks-symbol-to-title (symbol)
   (let ((display-name
-	 (or (cdr (assq symbol fm-bookmark-file-managers-display-name))
+	 (or (cdr (assq symbol fm-bookmarks-file-managers-display-name))
 	     (symbol-name symbol))))
     (concat
      display-name " "
-     (make-string (- fm-bookmark-buffer-width (+ 2 (length display-name))) ?=)
+     (make-string (- fm-bookmarks-buffer-width (+ 2 (length display-name))) ?=)
      "\n"
      )))
 
-(defun fm-bookmark-refresh ()
+(defun fm-bookmarks-refresh ()
   (interactive)
-  (if (equal (buffer-name) fm-bookmark-buffer-name)
+  (if (equal (buffer-name) fm-bookmarks-buffer-name)
       (let ((buffer-read-only nil)
             (curr-point (point)))
         (delete-region (point-min) (point-max))
         (message "Refreshing...")
         (insert
-         (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list)))
+         (setq fm-bookmarks--cache (fm-bookmarks-generate-propertized-list)))
         (goto-char curr-point)
         (message "Done!")
         )
     (message "Sorry, this function should be only used in FM bookmark buffer.")))
 
-(defun fm-bookmark-generate-propertized-list ()
+(defun fm-bookmarks-generate-propertized-list ()
   "Generate a formatted dir list with text propertized.
 kde4 =======
   dir1
@@ -304,51 +304,51 @@ gnome3 =====
   dir1
   dir2
  "
-  (setq fm-bookmark--seen-path '())
+  (setq fm-bookmarks--seen-path '())
   (mapconcat
    (lambda (fm-symbol)		;kde4, gnome3...etc
-     (concat (propertize (fm-bookmark-symbol-to-title fm-symbol)
-			 'face 'fm-bookmark-title)
+     (concat (propertize (fm-bookmarks-symbol-to-title fm-symbol)
+			 'face 'fm-bookmarks-title)
 	     (mapconcat
 	      (lambda (item)
                 (let ((path (replace-regexp-in-string "^file://" "" (cdr item))))
-                  (cond ((and fm-bookmark-hide-duplicated
-                              (member path fm-bookmark--seen-path))
+                  (cond ((and fm-bookmarks-hide-duplicated
+                              (member path fm-bookmarks--seen-path))
                          "")
                         ;; Patterns to hide items
-                        ((some (lambda (patt) (string-match patt path)) fm-bookmark-hide-by-path-pattern)
+                        ((some (lambda (patt) (string-match patt path)) fm-bookmarks-hide-by-path-pattern)
                          "")
-                        ((some (lambda (patt) (string-match patt (car item))) fm-bookmark-hide-by-name-pattern)
+                        ((some (lambda (patt) (string-match patt (car item))) fm-bookmarks-hide-by-name-pattern)
                          "")
                         (t
-                         (progn (push path fm-bookmark--seen-path)
+                         (progn (push path fm-bookmarks--seen-path)
                                 (propertize (concat "  " (car item) "\n")
-                                            'face (fm-bookmark-get-face fm-symbol)
+                                            'face (fm-bookmarks-get-face fm-symbol)
                                             'href path))))))
               (cond ((eq fm-symbol 'kde4)
-                     (fm-bookmark-kde4-parser))
+                     (fm-bookmarks-kde4-parser))
                     ((eq fm-symbol 'gnome3)
-                     (fm-bookmark-gtk-parser fm-symbol))
+                     (fm-bookmarks-gtk-parser fm-symbol))
                     ((eq fm-symbol 'pcmanfm)
-                     (fm-bookmark-gtk-parser fm-symbol))
+                     (fm-bookmarks-gtk-parser fm-symbol))
                     ((eq fm-symbol 'custom)
-                     fm-bookmark-custom-bookmarks)
+                     fm-bookmarks-custom-bookmarks)
                     ((eq fm-symbol 'media)
-                     (fm-bookmark-generate-media-pair-list)
+                     (fm-bookmarks-generate-media-pair-list)
                      )
                     )
               "")))
-   fm-bookmark-enabled-file-managers
+   fm-bookmarks-enabled-file-managers
    ""))
 
-(defun fm-bookmark-open-this ()
+(defun fm-bookmarks-open-this ()
   (interactive)
   (if (eolp) (left-char))
   (let ((link (get-text-property (point) 'href)))
     (if link
-	(progn (fm-bookmark-update-last-line-position)
+	(progn (fm-bookmarks-update-last-line-position)
 	       (delete-window (selected-window))
-	       (kill-buffer fm-bookmark-buffer-name)
+	       (kill-buffer fm-bookmarks-buffer-name)
 	       (find-file-other-window link)
 	       )
       (message "There's no link"))
@@ -358,10 +358,10 @@ gnome3 =====
 ;; Tools for UX
 ;; ======================================================
 
-(defun fm-bookmark-update-last-line-position ()
-  (setf fm-bookmark--last-line-position (line-number-at-pos)))
+(defun fm-bookmarks-update-last-line-position ()
+  (setf fm-bookmarks--last-line-position (line-number-at-pos)))
 
-(defun fm-bookmark-next-category ()
+(defun fm-bookmarks-next-category ()
   "Move cursor to next category"
   (interactive)
   (next-line)
@@ -371,7 +371,7 @@ gnome3 =====
   (next-line)
   )
 
-(defun fm-bookmark-previous-category ()
+(defun fm-bookmarks-previous-category ()
   "Move cursor to previous category"
   (interactive)
   (previous-line)
@@ -379,32 +379,32 @@ gnome3 =====
     (goto-char (previous-single-property-change (point) 'face nil (point-min))))
   (when (bobp)
     (goto-char (point-max))
-    (fm-bookmark-previous-category))
+    (fm-bookmarks-previous-category))
   )
 
-(defun fm-bookmark-next-line ()
+(defun fm-bookmarks-next-line ()
   (interactive)
   (next-line)
-  (if (eq (face-at-point) 'fm-bookmark-title)
+  (if (eq (face-at-point) 'fm-bookmarks-title)
       (next-line))
   (when (eobp) (goto-line 2))
   )
 
-(defun fm-bookmark-previous-line ()
+(defun fm-bookmarks-previous-line ()
   (interactive)
   (previous-line)
   (when (eq (line-number-at-pos) 1)
     (goto-char (point-max))
     (previous-line))
-  (if (eq (face-at-point) 'fm-bookmark-title)
+  (if (eq (face-at-point) 'fm-bookmarks-title)
       (previous-line)))
 
 ;; ======================================================
 ;; Parser
 ;; ======================================================
 
-(defun fm-bookmark-kde4-parser ()
-  (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmark-supported-file-managers))))
+(defun fm-bookmarks-kde4-parser ()
+  (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmarks-supported-file-managers))))
 	 (bookmarks (xml-get-children (car root) 'bookmark)))
     (remove-if
      #'null
@@ -425,10 +425,10 @@ gnome3 =====
      )))
 
 
-(defun fm-bookmark-gtk-parser (symbol)
+(defun fm-bookmarks-gtk-parser (symbol)
   "Available arg: 'gnome3 'pcmanfm"
   (with-temp-buffer
-    (insert-file-contents (cdr (assoc symbol fm-bookmark-supported-file-managers)))
+    (insert-file-contents (cdr (assoc symbol fm-bookmarks-supported-file-managers)))
     (mapcar
      (lambda (str)
        (let* ((line (split-string str " " t))
@@ -445,6 +445,6 @@ gnome3 =====
 
 
 
-(provide 'fm-bookmark)
+(provide 'fm-bookmarks)
 
-;;; fm-bookmark.el ends here
+;;; fm-bookmarks.el ends here
