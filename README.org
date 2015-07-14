@@ -40,9 +40,22 @@
           ("Tmp" . "/tmp/")
           ))
 
+  ;; Hide item by name/path pattern
+  (setq fm-bookmark-hide-by-name-pattern '("Bluetooth" "Images"))
+  (setq fm-bookmark-hide-by-path-pattern '())
 
+  ;; Don't show duplicated item. (Because the same path may be added by
+  ;; different FMs)
+  (defvar fm-bookmark-hide-duplicated t)
+
+  ;; "Mounted media" is an experimental function. If you don't want
+  ;; this, set this to nil.
   (setq fm-bookmark-enable-mounted-media t)
 
+  ;; Use cache to avoid regenerating list every time.
+  (setq fm-bookmark-enable-cache t)
+
+  ;; Shortcut to open FM bookmark.
   (global-set-key (kbd "C-x `") #'fm-bookmark)
   ;; Use ` to open in Dired-mode
   (define-key dired-mode-map (kbd "`") #'fm-bookmark)

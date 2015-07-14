@@ -132,6 +132,9 @@ Notice that 'media is only available on Unix-like OS (exclude Mac
 OS X)
 ")
 
+
+(defvar fm-bookmark-enable-cache t
+  "Use cache to avoid re-generating list every time.")
 (defvar fm-bookmark--cache nil
   "Used to store generated propertized & formatted list, which to
   prevent unnecessarily re-generate. DON'T CHANGE THIS." )
@@ -234,9 +237,10 @@ Output is like:
   (set-window-dedicated-p (selected-window) t)
   (let (buffer-read-only)
     (erase-buffer)
-    (insert (or fm-bookmark--cache
-                (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list))))
-    )
+    (if fm-bookmark-enable-cache
+        (insert (or fm-bookmark--cache
+                    (setq fm-bookmark--cache (fm-bookmark-generate-propertized-list))))
+      (insert (fm-bookmark-generate-propertized-list))))
   (fm-bookmark-mode)
   (goto-line fm-bookmark--last-line-position)
   ;; Disable linum
