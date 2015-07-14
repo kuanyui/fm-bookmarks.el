@@ -163,9 +163,6 @@ OS X)
 
 (defvar fm-bookmarks-hide-duplicated t
   "Hide duplicated path.")
-(defvar fm-bookmarks--seen-path '()
-  "Record seen paths to prevent duplicated paths. This is NOT
-  intend to be changed manually."  )
 
 (defvar fm-bookmarks-hide-by-name-pattern '("Bluetooth")
   "Patterns to hide (by name).")
@@ -304,42 +301,42 @@ gnome3 =====
   dir1
   dir2
  "
-  (setq fm-bookmarks--seen-path '())
-  (mapconcat
-   (lambda (fm-symbol)		;kde4, gnome3...etc
-     (concat (propertize (fm-bookmarks-symbol-to-title fm-symbol)
-			 'face 'fm-bookmarks-title)
-	     (mapconcat
-	      (lambda (item)
-                (let ((path (replace-regexp-in-string "^file://" "" (cdr item))))
-                  (cond ((and fm-bookmarks-hide-duplicated
-                              (member path fm-bookmarks--seen-path))
-                         "")
-                        ;; Patterns to hide items
-                        ((some (lambda (patt) (string-match patt path)) fm-bookmarks-hide-by-path-pattern)
-                         "")
-                        ((some (lambda (patt) (string-match patt (car item))) fm-bookmarks-hide-by-name-pattern)
-                         "")
-                        (t
-                         (progn (push path fm-bookmarks--seen-path)
-                                (propertize (concat "  " (car item) "\n")
-                                            'face (fm-bookmarks-get-face fm-symbol)
-                                            'href path))))))
-              (cond ((eq fm-symbol 'kde4)
-                     (fm-bookmarks-kde4-parser))
-                    ((eq fm-symbol 'gnome3)
-                     (fm-bookmarks-gtk-parser fm-symbol))
-                    ((eq fm-symbol 'pcmanfm)
-                     (fm-bookmarks-gtk-parser fm-symbol))
-                    ((eq fm-symbol 'custom)
-                     fm-bookmarks-custom-bookmarks)
-                    ((eq fm-symbol 'media)
-                     (fm-bookmarks-generate-media-pair-list)
-                     )
-                    )
-              "")))
-   fm-bookmarks-enabled-file-managers
-   ""))
+  (let (seen-paths)
+    (mapconcat
+     (lambda (fm-symbol)		;kde4, gnome3...etc
+       (concat (propertize (fm-bookmarks-symbol-to-title fm-symbol)
+                           'face 'fm-bookmarks-title)
+               (mapconcat
+                (lambda (item)
+                  (let ((path (replace-regexp-in-string "^file://" "" (cdr item))))
+                    (cond ((and fm-bookmarks-hide-duplicated
+                                (member path seen-paths))
+                           "")
+                          ;; Patterns to hide items
+                          ((some (lambda (patt) (string-match patt path)) fm-bookmarks-hide-by-path-pattern)
+                           "")
+                          ((some (lambda (patt) (string-match patt (car item))) fm-bookmarks-hide-by-name-pattern)
+                           "")
+                          (t
+                           (progn (push path seen-paths)
+                                  (propertize (concat "  " (car item) "\n")
+                                              'face (fm-bookmarks-get-face fm-symbol)
+                                              'href path))))))
+                (cond ((eq fm-symbol 'kde4)
+                       (fm-bookmarks-kde4-parser))
+                      ((eq fm-symbol 'gnome3)
+                       (fm-bookmarks-gtk-parser fm-symbol))
+                      ((eq fm-symbol 'pcmanfm)
+                       (fm-bookmarks-gtk-parser fm-symbol))
+                      ((eq fm-symbol 'custom)
+                       fm-bookmarks-custom-bookmarks)
+                      ((eq fm-symbol 'media)
+                       (fm-bookmarks-generate-media-pair-list)
+                       )
+                      )
+                "")))
+     fm-bookmarks-enabled-file-managers
+     "")))
 
 (defun fm-bookmarks-open-this ()
   (interactive)
