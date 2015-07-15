@@ -24,6 +24,7 @@
      + PCManFM (LXDE)
 
 ** Installation
+=fm-bookmarks= is available in [[https://github.com/milkypostman/melpa][MELPA]] package repository. To install via MELPA, you can read its [[https://github.com/milkypostman/melpa#usage][instructions]].
 
 #+BEGIN_SRC elisp
   (add-to-list 'load-path "/path/to/fm-bookmarks.el")
