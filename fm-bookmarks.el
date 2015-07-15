@@ -53,7 +53,7 @@
 ;;; Code:
 
 (require 'xml)
-(require 'cl)
+(require 'cl-lib)
 (require 'dired)
 
 ;; ======================================================
@@ -128,7 +128,7 @@
   "" :group 'fm-bookmarks-faces)
 
 (defun fm-bookmarks-get-face (symbol)
-  (cdr (assoc* symbol '(((kde4 gnome3 pcmanfm)	. fm-bookmarks-file-manager)
+  (cdr (cl-assoc symbol '(((kde4 gnome3 pcmanfm) . fm-bookmarks-file-manager)
 			((media)		. fm-bookmarks-media)
 			((custom)		. fm-bookmarks-custom))
 	       :test (lambda (sym pair) (memq sym pair))
@@ -206,7 +206,7 @@ Output is like:
 ((\"/dev/sdb1\" . \"/var/run/media/kuanyui/kuanyui\")
  (\"/dev/sdb2\" . \"/var/run/media/kuanyui/windows\")
  (\"/dev/sdc1\" . \"/var/run/media/kuanyui/kuanyui 1G\"))"
-(remove-duplicates
+(cl-remove-duplicates
  (mapcar (lambda (line)
 	   (save-match-data
 	     (string-match "^\\([^ ]+\\) on \\(.+\\) type [^ ]+ [^ ]+$" line)
@@ -313,9 +313,9 @@ gnome3 =====
                                 (member path seen-paths))
                            "")
                           ;; Patterns to hide items
-                          ((some (lambda (patt) (string-match patt path)) fm-bookmarks-hide-by-path-pattern)
+                          ((cl-some (lambda (patt) (string-match patt path)) fm-bookmarks-hide-by-path-pattern)
                            "")
-                          ((some (lambda (patt) (string-match patt (car item))) fm-bookmarks-hide-by-name-pattern)
+                          ((cl-some (lambda (patt) (string-match patt (car item))) fm-bookmarks-hide-by-name-pattern)
                            "")
                           (t
                            (progn (push path seen-paths)
@@ -403,7 +403,7 @@ gnome3 =====
 (defun fm-bookmarks-kde4-parser ()
   (let* ((root (xml-parse-file (cdr (assoc 'kde4 fm-bookmarks-supported-file-managers))))
 	 (bookmarks (xml-get-children (car root) 'bookmark)))
-    (remove-if
+    (cl-remove-if
      #'null
      (mapcar (lambda (bookmark)
 	       (unless (let ((metadata (apply #'append (xml-get-children (assoc 'info bookmark) 'metadata))))
