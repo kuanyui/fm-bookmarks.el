@@ -1,4 +1,4 @@
-;;; fm-bookmarks.el --- Access existed FM bookmarks (ex: Dolphin, Nautilus, PCManFM) via Dired  -*- lexical-binding: t; -*-
+;;; fm-bookmarks.el --- Use file manager bookmarks (eg Dolphin, Nautilus, PCManFM) in Dired  -*- lexical-binding: t; -*-
 
 ;; Author: Ono Hiroko <azazabc123@gmail.com>
 ;; Keywords: files, convenience
@@ -32,7 +32,7 @@
 ;; For more detailed configuration & usage, visit:
 ;; https://github.com/kuanyui/fm-bookmarks.el
 
-;; Use existed bookmarks of file managers (e.g. Dolphin, Nautilus,
+;; Use existing bookmarks of file managers (e.g. Dolphin, Nautilus,
 ;; PCManFM) in Dired.
 
 ;;   (add-to-list 'load-path "/path/to/fm-bookmarks.el")
@@ -61,7 +61,7 @@
 ;; ======================================================
 
 (defgroup fm-bookmarks nil
-  "Access existed FM bookmark in Dired"
+  "Access existing FM bookmark in Dired"
   :prefix "fm-bookmarks-"
   :link '(url-link "http://github.com/kuanyui/fm-bookmarks.el"))
 
