@@ -1,6 +1,6 @@
 * fm-bookmarks.el
 
-  Use existed file managers' bookmarks in Dired.
+  Use existed file managers' (FM) bookmarks in Dired.
 
 ** Introduce
    If you're using Dired, you may want to directly access existed
@@ -12,6 +12,20 @@
    =fm-bookmarks.el= also has an experimental feature to list mounted
    media (via =mount= shell command, due to the limitation of the crap
    Emacs Lisp).
+
+   #+BEGIN_QUOTE
+   =fm-bookmarks.el= currently supports:
+
+   - Dolphin
+   - Nautilus
+   - PCManFM
+
+   because I have no Windows & Mac, sorry. :sweat:
+
+   However, *without supported FMs, you still can use custom bookmarks*.
+
+   If you can, please feel free to send a PR, or give me an example bookmarks file (& its path) of the other FMs. Thank you! :pray:   
+   #+END_QUOTE
 
 ** Screenshot
 
@@ -40,7 +54,7 @@
   ;; Notice that 'media currently is only available on Unix-like OS
   (setq fm-bookmarks-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
 
-  ;; Add customized bookmarks
+  ;; Add custom bookmarks
   (setq fm-bookmarks-custom-bookmarks
         '(("Root" . "/")
           ("Tmp" . "/tmp/")
