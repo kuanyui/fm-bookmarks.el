@@ -16,7 +16,7 @@
    #+BEGIN_QUOTE
    =fm-bookmarks.el= currently supports:
 
-   - Dolphin
+   - Dolphin (KDE 4 & 5)
    - Nautilus
    - PCManFM
 
@@ -33,7 +33,7 @@
 
 ** Requirement
    - Any of supported file managers. Currently available:
-     + Dolphin (KDE4)
+     + Dolphin (KDE4 or 5)
      + Nautilus (GNOME3)
      + PCManFM (LXDE)
 
@@ -77,24 +77,23 @@
 #+END_SRC
 
 ** Usage
-| Key          | Description               |
-|--------------+---------------------------|
-| =Enter=      | Open this directory       |
-| =g=          | Refresh list              |
-| =q=          | Close and quit            |
-|--------------+---------------------------|
-| =Tab=        | Jump to next category     |
-| =Shift-Tab=  | Jump to previous category |
-|--------------+---------------------------|
-| =Up= , =p=   | Previous item             |
-| =Down= , =n= | Next item                 |
+| Key       | Description               |
+|-----------+---------------------------|
+| =Enter=     | Open this directory       |
+| =g=         | Refresh list              |
+| =q=         | Close and quit            |
+|-----------+---------------------------|
+| =Tab=       | Jump to next category     |
+| =Shift-Tab= | Jump to previous category |
+|-----------+---------------------------|
+| =Up= , =p=    | Previous item             |
+| =Down= , =n=  | Next item                 |
 
 ** Todo
    - [X] Pattern to hide items.
    - [X] Hide duplicated item
    - [X] Don't generate list every time.
-   - [ ] More supported FM.
-     + [ ] KDE 5?
+   - [ ] More supported FMs.
      + [ ] Windows Explorer?
      + [ ] OSX Finder?
    - [ ] Update modeline with cursor moving (To show info of the path).

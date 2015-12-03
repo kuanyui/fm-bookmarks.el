@@ -61,7 +61,7 @@
 ;; ======================================================
 
 (defgroup fm-bookmarks nil
-  "Access existing FM bookmark in Dired"
+  "Use existing FM bookmark in Dired"
   :prefix "fm-bookmarks-"
   :link '(url-link "http://github.com/kuanyui/fm-bookmarks.el"))
 
@@ -128,11 +128,11 @@
   "" :group 'fm-bookmarks-faces)
 
 (defun fm-bookmarks-get-face (symbol)
-  (cdr (cl-assoc symbol '(((kde4 gnome3 pcmanfm) . fm-bookmarks-file-manager)
-			((media)		. fm-bookmarks-media)
-			((custom)		. fm-bookmarks-custom))
-	       :test (lambda (sym pair) (memq sym pair))
-	       )))
+  (cdr (cl-assoc symbol '(((kde4 kde5 gnome3 pcmanfm) . fm-bookmarks-file-manager)
+                          ((media)		. fm-bookmarks-media)
+                          ((custom)		. fm-bookmarks-custom))
+                 :test (lambda (sym pair) (memq sym pair))
+                 )))
 
 ;; ======================================================
 ;; Variables
@@ -171,11 +171,13 @@ OS X)
 
 (defconst fm-bookmarks-supported-file-managers
   '((kde4	.	"~/.kde4/share/apps/kfileplaces/bookmarks.xml")
+    (kde5	.	"~/.local/share/user-places.xbel")
     (gnome3	.	"~/.config/gtk-3.0/bookmarks")
     (pcmanfm	.	"~/.gtk-bookmarks")))
 
 (defvar fm-bookmarks-file-managers-display-name
-  '((kde4	.	"Dolphin")
+  '((kde4	.	"Dolphin (KDE4)")
+    (kde5	.	"Dolphin (KDE5)")
     (gnome3	.	"Nautilus")
     (pcmanfm	.	"PCManFM")
     (custom     .       "Custom Bookmarks")
@@ -324,6 +326,8 @@ gnome3 =====
                                               'href path))))))
                 (cond ((eq fm-symbol 'kde4)
                        (fm-bookmarks-kde4-parser))
+                      ((eq fm-symbol 'kde5)
+                       (fm-bookmarks-kde5-parser))
                       ((eq fm-symbol 'gnome3)
                        (fm-bookmarks-gtk-parser fm-symbol))
                       ((eq fm-symbol 'pcmanfm)
@@ -421,6 +425,27 @@ gnome3 =====
 	     )
      )))
 
+
+(defun fm-bookmarks-kde5-parser ()
+  (let* ((root (xml-parse-file (cdr (assoc 'kde5 fm-bookmarks-supported-file-managers))))
+	 (bookmarks (xml-get-children (car root) 'bookmark)))
+    (cl-remove-if
+     #'null
+     (mapcar (lambda (bookmark)
+	       (unless (let ((metadata (apply #'append (xml-get-children (assoc 'info bookmark) 'metadata))))
+			 (or (assoc 'isSystemItem metadata) ;No add if exist
+			     (assoc 'OnlyInApp metadata)))  ;No add if exist
+		 (cons
+		  (nth 2 (car (xml-get-children bookmark 'title))) ;title
+		  (decode-coding-string ;link
+		   (url-unhex-string
+		    (cdr (assoc 'href (nth 1 bookmark))))
+		   'utf-8)
+		  )
+		 ))
+	     bookmarks
+	     )
+     )))
 
 (defun fm-bookmarks-gtk-parser (symbol)
   "Available arg: 'gnome3 'pcmanfm"
