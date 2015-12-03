@@ -49,10 +49,10 @@
   ;; Use ` to open FM Bookmarks in Dired-mode
   (define-key dired-mode-map (kbd "`") #'fm-bookmarks)
 
-  ;; Available options: kde4, gnome3, pcmanfm, custom
+  ;; Available options: kde5, kde4, gnome3, pcmanfm, custom
   ;; Multiple file managers are acceptable.
   ;; Notice that 'media currently is only available on Unix-like OS
-  (setq fm-bookmarks-enabled-file-managers '(kde4 gnome3 pcmanfm custom media))
+  (setq fm-bookmarks-enabled-file-managers '(kde5 kde4 gnome3 pcmanfm custom media))
 
   ;; Add custom bookmarks
   (setq fm-bookmarks-custom-bookmarks
